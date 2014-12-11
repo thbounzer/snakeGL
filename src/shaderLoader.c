@@ -9,20 +9,32 @@
 
 GLchar *loadShader(char *filename){
     GLchar *charBuf = calloc(CHARBUFSIZE,sizeof(GLchar));
+    if (charBuf == NULL)
+        return NULL;
     FILE *shader;
     int bufIndex = 0;
     int sourceBufSize = CHARBUFSIZE;
     shader = fopen(filename,"r");
-    while(!feof(shader)){    
-        charBuf[bufIndex] = (GLchar) fgetc(shader);
-        bufIndex += 1;
-        if ((bufIndex % CHARBUFMAXIDX) == 0){
-            duplicateBuffer(charBuf,sourceBufSize);
-            sourceBufSize = sourceBufSize*2;
+    if (shader == NULL){
+        free(charBuf);
+        return NULL;        
+    }else{        
+        while(!feof(shader)){    
+            charBuf[bufIndex] = (GLchar) fgetc(shader);
+            bufIndex += 1;
+            if ((bufIndex % CHARBUFMAXIDX) == 0){
+                if (duplicateBuffer(charBuf,sourceBufSize) >= 0){
+                    sourceBufSize = sourceBufSize*2;
+                }else{
+                    free(charBuf);
+                    return NULL;
+                }    
+            }
         }
+        fclose(shader);
+        charBuf[bufIndex-1] = '\0';
+        return charBuf;        
     }
-    fclose(shader);
-    return charBuf;
 }
 
 void destroyBuffer(GLchar *buffer){
@@ -30,9 +42,14 @@ void destroyBuffer(GLchar *buffer){
 }
 
 
-void duplicateBuffer(GLchar *buffer,int currentSize){
+int duplicateBuffer(GLchar *buffer,int currentSize){
     GLchar *expandedBuffer = calloc(currentSize*2,sizeof(GLchar));
-    mempcpy(expandedBuffer,buffer,currentSize);
-    destroyBuffer(buffer);
-    buffer = expandedBuffer;    
+    if (expandedBuffer){
+        memcpy(expandedBuffer,buffer,currentSize);
+        destroyBuffer(buffer);
+        buffer = expandedBuffer;
+        return 0;
+    }else{
+        return -1;
+    }
 }
