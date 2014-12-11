@@ -4,33 +4,35 @@
 #include <stdio.h>
 #include <string.h>
 
-#define CHARBUFSIZE 250
+#define CHARBUFSIZE 128
+#define CHARBUFMAXIDX (CHARBUFSIZE - 1)
 
 GLchar *loadShader(char *filename){
     GLchar *charBuf = calloc(CHARBUFSIZE,sizeof(GLchar));
     FILE *shader;
-    int defSizeIndex = 0;
     int bufIndex = 0;
-    int bufMultiplier = 1;
-    int sourceBufSize;
+    int sourceBufSize = CHARBUFSIZE;
     shader = fopen(filename,"r");
     while(!feof(shader)){    
         charBuf[bufIndex] = (GLchar) fgetc(shader);
-        defSizeIndex += 1;
         bufIndex += 1;
-        if (defSizeIndex == (CHARBUFSIZE-1)){
-            sourceBufSize = CHARBUFSIZE*bufMultiplier;
-            bufMultiplier += 1;
-            defSizeIndex = 0;
-            GLchar *expandedBuffer = calloc(CHARBUFSIZE*bufMultiplier,sizeof(GLchar));
-            mempcpy(expandedBuffer,charBuf,sourceBufSize);
-            destroyBuffer(charBuf);
-            charBuf = expandedBuffer;
+        if ((bufIndex % CHARBUFMAXIDX) == 0){
+            duplicateBuffer(charBuf,sourceBufSize);
+            sourceBufSize = sourceBufSize*2;
         }
     }
+    fclose(shader);
     return charBuf;
 }
 
 void destroyBuffer(GLchar *buffer){
     free(buffer);
+}
+
+
+void duplicateBuffer(GLchar *buffer,int currentSize){
+    GLchar *expandedBuffer = calloc(currentSize*2,sizeof(GLchar));
+    mempcpy(expandedBuffer,buffer,currentSize);
+    destroyBuffer(buffer);
+    buffer = expandedBuffer;    
 }

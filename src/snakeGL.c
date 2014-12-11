@@ -5,7 +5,7 @@
 
 int main(void)
 {
-    GLchar *shader = loadShader("/home/carlo/Documents/Sources/Various/snakeGL/shader.txt");
+    GLchar *shader = loadShader("/home/carlo/Documents/Sources/Various/snakeGL/vertex.shader");
     puts(shader);
     free(shader);    
 }

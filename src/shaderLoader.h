@@ -12,5 +12,7 @@ GLchar *loadShader(char *filename);
 
 void destroyBuffer(GLchar *buffer);
 
+void duplicateBuffer(GLchar *buffer,int currentSize);
+
 #endif	/* SHADERLOADER_H */
 
